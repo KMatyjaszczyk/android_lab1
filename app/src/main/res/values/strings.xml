@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Kalkulator ocen</string>
+    <string name="textViewName">Imię</string>
+    <string name="textViewSurname">Nazwisko</string>
+    <string name="textViewNumberOfGrades">Liczba ocen</string>
+    <string name="editTextNameHint">Podaj imię</string>
+    <string name="editTextSurnameHint">Podaj nazwisko</string>
+    <string name="editTextNumberOfGradesHint">Podaj liczbę ocen (5–15)</string>
+    <string name="buttonGoFurther">Oceny</string>
+    <string name="textIsEmptyAnnouncement">Pusty tekst</string>
+    <string name="wrongNumberOfGradesAnnouncement">Niepoprawna liczba</string>
+    <string name="buttonCountAverage">Oblicz średnią</string>
+</resources>
