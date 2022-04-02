@@ -77,18 +77,19 @@ public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.GradesAdap
 
         private void setOnChangeListenerOnRadioGroup() {
             mRadioGroupGrades.setOnCheckedChangeListener((radioGroup, i) -> {
+                int index = (int) mRadioGroupGrades.getTag();
                 switch (i) {
                     case R.id.radioButtonThree:
-                        mGrades.get((int) mRadioGroupGrades.getTag()).setGrade(GRADE_THREE);
+                        mGrades.get(index).setGrade(GRADE_THREE);
                         break;
                     case R.id.radioButtonFour:
-                        mGrades.get((int) mRadioGroupGrades.getTag()).setGrade(GRADE_FOUR);
+                        mGrades.get(index).setGrade(GRADE_FOUR);
                         break;
                     case R.id.radioButtonFive:
-                        mGrades.get((int) mRadioGroupGrades.getTag()).setGrade(GRADE_FIVE);
+                        mGrades.get(index).setGrade(GRADE_FIVE);
                         break;
                     default:
-                        mGrades.get((int) mRadioGroupGrades.getTag()).setGrade(GRADE_TWO);
+                        mGrades.get(index).setGrade(GRADE_TWO);
                         break;
                 }
             });
