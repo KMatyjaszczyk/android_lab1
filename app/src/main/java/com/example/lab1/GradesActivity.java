@@ -6,16 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class GradesActivity extends AppCompatActivity {
+    public static final String AVERAGE_KEY = "average";
     private static final String GRADE_PREFIX_KEY = "grade_";
 
     List<Grade> mGrades;
@@ -28,8 +29,8 @@ public class GradesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grades);
         mButtonCountAverage = findViewById(R.id.buttonCountAverage);
 
-        Bundle bundle = getIntent().getExtras();
-        int numberOfGrades = Integer.parseInt(bundle.getString(MainActivity.EDIT_TEXT_NUMBER_OF_GRADES_KEY));
+        Bundle bundleFromMainActivity = getIntent().getExtras();
+        int numberOfGrades = Integer.parseInt(bundleFromMainActivity.getString(MainActivity.EDIT_TEXT_NUMBER_OF_GRADES_KEY));
 
         createGrades(numberOfGrades);
         createRecyclerViewWithAdapter();
@@ -64,8 +65,9 @@ public class GradesActivity extends AppCompatActivity {
 
     private void createGrades(int numberOfGrades) {
         mGrades = new ArrayList<>();
+        String[] subjectNames = getResources().getStringArray(R.array.subjectNames);
         for (int i = 0; i < numberOfGrades; i++) {
-            mGrades.add(new Grade(String.format(Locale.getDefault(), "Przedmiot %d", i + 1), GradesAdapter.GRADE_TWO));
+            mGrades.add(new Grade(subjectNames[i], GradesAdapter.GRADE_TWO));
         }
     }
 
@@ -79,9 +81,12 @@ public class GradesActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void setOnClickListenerToCountAverageButton() {
         mButtonCountAverage.setOnClickListener(view -> {
-            double average = mGrades.stream().mapToDouble(Grade::getGrade).average().orElse(0);
-            String outputText = String.format(Locale.getDefault(), "Average: %.2f", average);
-            Toast.makeText(GradesActivity.this, outputText, Toast.LENGTH_SHORT).show();
+            // TODO extract to another method
+            double average = mGrades.stream().mapToDouble(Grade::getGrade).average().orElse(0.0);
+
+            Intent intent = new Intent(GradesActivity.this, MainActivity.class);
+            intent.putExtra(AVERAGE_KEY, average);
+            view.getContext().startActivity(intent);
         });
     }
 }

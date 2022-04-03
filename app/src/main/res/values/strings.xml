@@ -10,4 +10,26 @@
     <string name="textIsEmptyAnnouncement">Pusty tekst</string>
     <string name="wrongNumberOfGradesAnnouncement">Niepoprawna liczba</string>
     <string name="buttonCountAverage">Oblicz średnią</string>
+    <string name="textViewYourAverage">Twoja średnia ocen</string>
+    <string name="buttonConfirmAveragePositive">Super :)</string>
+    <string name="buttonConfirmAverageNegative">Tym razem mi nie poszło</string>
+    <string name="textOnExitApplicationPositive">Gratulacje! Otrzymujesz zaliczenie!</string>
+    <string name="textOnExitApplicationNegative">Wysyłam podanie o zaliczenie warunkowe</string>
+    <string-array name="subjectNames">
+        <item>Podstawy ekonomii</item>
+        <item>Algorytmika</item>
+        <item>Bazy danych Oracle</item>
+        <item>Obiektowe w C++</item>
+        <item>Obiektowe w Java</item>
+        <item>Własność intelektualna</item>
+        <item>Bazy danych NoSQL</item>
+        <item>Matematyka dla INF</item>
+        <item>Matematyka dyskretna</item>
+        <item>Elektrotechnika</item>
+        <item>Systemy wbudowane</item>
+        <item>Integracja systemów</item>
+        <item>Aplikacje internetowe</item>
+        <item>Fizjologia</item>
+        <item>Anatomia</item>
+    </string-array>
 </resources>

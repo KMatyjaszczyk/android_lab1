@@ -11,7 +11,10 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final int MIN_NUMBER_OF_GRADES = 5;
@@ -26,16 +29,44 @@ public class MainActivity extends AppCompatActivity {
     EditText editTextSurname;
     EditText editTextNumberOfGrades;
     Button buttonGoFurther;
+    TextView textViewYourAverage;
+    Button buttonConfirmAverage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_constraint);
+        setContentView(R.layout.activity_main);
 
         connectLayoutElementsWithFields();
         hideButtonAtTheBeginning();
 
         addListenersToElements();
+
+        // TODO extract to another method
+        Bundle bundleFromGradesActivity = getIntent().getExtras();
+        if (bundleFromGradesActivity != null) {
+            // TODO implement button logic
+            textViewYourAverage.setVisibility(View.VISIBLE);
+            buttonConfirmAverage.setVisibility(View.VISIBLE);
+
+            double average = bundleFromGradesActivity.getDouble(GradesActivity.AVERAGE_KEY);
+            String averageMessage = String.format(Locale.getDefault(), "%s: %.2f",
+                    getResources().getString(R.string.textViewYourAverage), average);
+            textViewYourAverage.setText(averageMessage);
+            boolean isGradePositive = average >= 3.0;
+
+            buttonConfirmAverage.setText(isGradePositive ?
+                    R.string.buttonConfirmAveragePositive : R.string.buttonConfirmAverageNegative);
+
+            buttonConfirmAverage.setOnClickListener(view -> {
+                Toast.makeText(
+                        MainActivity.this,
+                        isGradePositive ? R.string.textOnExitApplicationPositive : R.string.textOnExitApplicationNegative,
+                        Toast.LENGTH_LONG)
+                        .show();
+                MainActivity.this.finishAffinity();
+            });
+        }
     }
 
     @Override
@@ -65,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         editTextSurname = findViewById(R.id.editTextSurname);
         editTextNumberOfGrades = findViewById(R.id.editTextNumberOfGrades);
         buttonGoFurther = findViewById(R.id.buttonGoFurther);
+        textViewYourAverage = findViewById(R.id.textViewYourAverage);
+        buttonConfirmAverage = findViewById(R.id.buttonConfirmAverage);
     }
 
     private void hideButtonAtTheBeginning() {
