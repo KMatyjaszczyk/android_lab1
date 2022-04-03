@@ -11,7 +11,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,14 +40,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        TextView editTextName = findViewById(R.id.editTextName); // TODO does findViewById() have to be here ? those variables are in the class fields
-        TextView editTextSurname = findViewById(R.id.editTextSurname);
-        TextView editTextNumberGrades = findViewById(R.id.editTextNumberOfGrades);
         boolean isButtonVisible = findViewById(R.id.buttonGoFurther).getVisibility() == View.VISIBLE;
 
         outState.putString(EDIT_TEXT_NAME_KEY, editTextName.getText().toString());
         outState.putString(EDIT_TEXT_SURNAME_KEY, editTextSurname.getText().toString());
-        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberGrades.getText().toString());
+        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
         outState.putBoolean(IS_BUTTON_VISIBLE_KEY, isButtonVisible);
 
         super.onSaveInstanceState(outState);

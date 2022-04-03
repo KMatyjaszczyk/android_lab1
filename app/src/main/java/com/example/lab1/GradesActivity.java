@@ -1,5 +1,6 @@
 package com.example.lab1;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,9 +13,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
+import java.util.Locale;
 
 public class GradesActivity extends AppCompatActivity {
+    private static final String GRADE_PREFIX_KEY = "grade_";
+
     List<Grade> mGrades;
     Button mButtonCountAverage;
 
@@ -33,14 +36,36 @@ public class GradesActivity extends AppCompatActivity {
         setOnClickListenerToCountAverageButton();
     }
 
-    // TODO zrealizuj odpakowywanie i pakowanie danych o ocenach (odpakowywanie mozesz zrobic w onCreate())
-    // TODO przetestowac obracanie ekranu
-    // TODO przy przewijaniu pozaznaczaj elementy 2, 3, 4, 5 - potem obroc ekran i zobacz czy dobrze sie przyciski zaznaczaja
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        for (int i = 0; i < mGrades.size(); i++) {
+            String key = receiveGradeKeyForIndex(i);
+            outState.putInt(key, mGrades.get(i).getGrade());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        for (int i = 0; i < mGrades.size(); i++) {
+            String key = receiveGradeKeyForIndex(i);
+            int grade = savedInstanceState.getInt(key);
+            mGrades.get(i).setGrade(grade);
+        }
+    }
+
+    @NonNull
+    private String receiveGradeKeyForIndex(int index) {
+        return String.format(Locale.getDefault(), "%s%d", GRADE_PREFIX_KEY, index);
+    }
 
     private void createGrades(int numberOfGrades) {
         mGrades = new ArrayList<>();
         for (int i = 0; i < numberOfGrades; i++) {
-            mGrades.add(new Grade(String.format("Przedmiot %d", i + 1), GradesAdapter.GRADE_TWO));
+            mGrades.add(new Grade(String.format(Locale.getDefault(), "Przedmiot %d", i + 1), GradesAdapter.GRADE_TWO));
         }
     }
 
@@ -55,7 +80,7 @@ public class GradesActivity extends AppCompatActivity {
     private void setOnClickListenerToCountAverageButton() {
         mButtonCountAverage.setOnClickListener(view -> {
             double average = mGrades.stream().mapToDouble(Grade::getGrade).average().orElse(0);
-            String outputText = String.format("Average: %.2f", average);
+            String outputText = String.format(Locale.getDefault(), "Average: %.2f", average);
             Toast.makeText(GradesActivity.this, outputText, Toast.LENGTH_SHORT).show();
         });
     }
