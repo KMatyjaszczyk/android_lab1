@@ -19,6 +19,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     private static final int MIN_NUMBER_OF_GRADES = 5;
     private static final int MAX_NUMBER_OF_GRADES = 15;
+    private static final double POSITIVE_AVERAGE_THRESHOLD = 3.0;
 
     public static final String EDIT_TEXT_NAME_KEY = "editTextName";
     public static final String EDIT_TEXT_SURNAME_KEY = "editTextSurname";
@@ -42,53 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         addListenersToElements();
 
-        // TODO extract to another method
-        Bundle bundleFromGradesActivity = getIntent().getExtras();
-        if (bundleFromGradesActivity != null) {
-            // TODO implement button logic
-            textViewYourAverage.setVisibility(View.VISIBLE);
-            buttonConfirmAverage.setVisibility(View.VISIBLE);
-
-            double average = bundleFromGradesActivity.getDouble(GradesActivity.AVERAGE_KEY);
-            String averageMessage = String.format(Locale.getDefault(), "%s: %.2f",
-                    getResources().getString(R.string.textViewYourAverage), average);
-            textViewYourAverage.setText(averageMessage);
-            boolean isGradePositive = average >= 3.0;
-
-            buttonConfirmAverage.setText(isGradePositive ?
-                    R.string.buttonConfirmAveragePositive : R.string.buttonConfirmAverageNegative);
-
-            buttonConfirmAverage.setOnClickListener(view -> {
-                Toast.makeText(
-                        MainActivity.this,
-                        isGradePositive ? R.string.textOnExitApplicationPositive : R.string.textOnExitApplicationNegative,
-                        Toast.LENGTH_LONG)
-                        .show();
-                MainActivity.this.finishAffinity();
-            });
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        boolean isButtonVisible = findViewById(R.id.buttonGoFurther).getVisibility() == View.VISIBLE;
-
-        outState.putString(EDIT_TEXT_NAME_KEY, editTextName.getText().toString());
-        outState.putString(EDIT_TEXT_SURNAME_KEY, editTextSurname.getText().toString());
-        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
-        outState.putBoolean(IS_BUTTON_VISIBLE_KEY, isButtonVisible);
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        editTextName.setText(savedInstanceState.getString(EDIT_TEXT_NAME_KEY));
-        editTextSurname.setText(savedInstanceState.getString(EDIT_TEXT_SURNAME_KEY));
-        editTextNumberOfGrades.setText(savedInstanceState.getString(EDIT_TEXT_NUMBER_OF_GRADES_KEY));
-        buttonGoFurther.setVisibility(
-                savedInstanceState.getBoolean(IS_BUTTON_VISIBLE_KEY) ? View.VISIBLE : View.INVISIBLE);
+        processCountedAverage();
     }
 
     private void connectLayoutElementsWithFields() {
@@ -199,5 +154,67 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return numberOfGrades >= MIN_NUMBER_OF_GRADES && numberOfGrades <= MAX_NUMBER_OF_GRADES;
+    }
+
+    private void processCountedAverage() {
+        Bundle bundleFromGradesActivity = getIntent().getExtras();
+        if (bundleFromGradesActivity != null) {
+            double average = bundleFromGradesActivity.getDouble(GradesActivity.AVERAGE_KEY);
+            boolean isGradePositive = average >= POSITIVE_AVERAGE_THRESHOLD;
+
+            displayAverageViewElements();
+            setAverageInTextView(average);
+            setProperTextInFinalButton(isGradePositive);
+            displayFinalMessageAndCloseApplication(isGradePositive);
+        }
+    }
+
+    private void displayAverageViewElements() {
+        textViewYourAverage.setVisibility(View.VISIBLE);
+        buttonConfirmAverage.setVisibility(View.VISIBLE);
+    }
+
+    private void setAverageInTextView(double average) {
+        String averageMessage = String.format(Locale.getDefault(), "%s: %.2f",
+                getResources().getString(R.string.textViewYourAverage), average);
+        textViewYourAverage.setText(averageMessage);
+    }
+
+    private void setProperTextInFinalButton(boolean isGradePositive) {
+        buttonConfirmAverage.setText(isGradePositive ?
+                R.string.buttonConfirmAveragePositive : R.string.buttonConfirmAverageNegative);
+    }
+
+    private void displayFinalMessageAndCloseApplication(boolean isGradePositive) {
+        buttonConfirmAverage.setOnClickListener(view -> {
+            Toast.makeText(
+                    MainActivity.this,
+                    isGradePositive ? R.string.textOnExitApplicationPositive : R.string.textOnExitApplicationNegative,
+                    Toast.LENGTH_LONG)
+                    .show();
+            MainActivity.this.finishAffinity();
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        boolean isButtonVisible = findViewById(R.id.buttonGoFurther).getVisibility() == View.VISIBLE;
+
+        outState.putString(EDIT_TEXT_NAME_KEY, editTextName.getText().toString());
+        outState.putString(EDIT_TEXT_SURNAME_KEY, editTextSurname.getText().toString());
+        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
+        outState.putBoolean(IS_BUTTON_VISIBLE_KEY, isButtonVisible);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        editTextName.setText(savedInstanceState.getString(EDIT_TEXT_NAME_KEY));
+        editTextSurname.setText(savedInstanceState.getString(EDIT_TEXT_SURNAME_KEY));
+        editTextNumberOfGrades.setText(savedInstanceState.getString(EDIT_TEXT_NUMBER_OF_GRADES_KEY));
+        buttonGoFurther.setVisibility(
+                savedInstanceState.getBoolean(IS_BUTTON_VISIBLE_KEY) ? View.VISIBLE : View.INVISIBLE);
     }
 }
