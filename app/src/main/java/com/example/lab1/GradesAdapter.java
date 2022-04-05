@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.GradesAdapterViewHolder> {
-    public static int GRADE_TWO = 2;
-    public static int GRADE_THREE = 3;
-    public static int GRADE_FOUR = 4;
-    public static int GRADE_FIVE = 5;
+    public static final int GRADE_TWO = 2;
+    public static final int GRADE_THREE = 3;
+    public static final int GRADE_FOUR = 4;
+    public static final int GRADE_FIVE = 5;
 
     private final List<Grade> mGrades;
     private final Activity mActivity;
@@ -40,11 +40,26 @@ public class GradesAdapter extends RecyclerView.Adapter<GradesAdapter.GradesAdap
 
         holder.mTextViewGrade.setText(grade.getSubject());
         holder.mRadioGroupGrades.setTag(position);
+        setProperRadioButtonInGroup(holder, grade);
+    }
 
-        holder.mRadioButtonTwo.setChecked(grade.getGrade() == GRADE_TWO);
-        holder.mRadioButtonThree.setChecked(grade.getGrade() == GRADE_THREE);
-        holder.mRadioButtonFour.setChecked(grade.getGrade() == GRADE_FOUR);
-        holder.mRadioButtonFive.setChecked(grade.getGrade() == GRADE_FIVE);
+    private void setProperRadioButtonInGroup(@NonNull GradesAdapterViewHolder holder, Grade grade) {
+        int radioButtonIdToCheck;
+        switch (grade.getGrade()) {
+            case GRADE_THREE:
+                radioButtonIdToCheck = R.id.radioButtonThree;
+                break;
+            case GRADE_FOUR:
+                radioButtonIdToCheck = R.id.radioButtonFour;
+                break;
+            case GRADE_FIVE:
+                radioButtonIdToCheck = R.id.radioButtonFive;
+                break;
+            default:
+                radioButtonIdToCheck = R.id.radioButtonTwo;
+                break;
+        }
+        holder.mRadioGroupGrades.check(radioButtonIdToCheck);
     }
 
     @Override
