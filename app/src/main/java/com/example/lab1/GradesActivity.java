@@ -34,7 +34,8 @@ public class GradesActivity extends AppCompatActivity {
 
     private void createGrades() {
         Bundle bundleFromMainActivity = getIntent().getExtras();
-        int numberOfGrades = Integer.parseInt(bundleFromMainActivity.getString(MainActivity.EDIT_TEXT_NUMBER_OF_GRADES_KEY));
+        int numberOfGrades = Integer.parseInt(
+                bundleFromMainActivity.getString(MainActivity.EDIT_TEXT_NUMBER_OF_GRADES_KEY));
 
         createGradesWithInitialValues(numberOfGrades);
     }
@@ -73,7 +74,8 @@ public class GradesActivity extends AppCompatActivity {
     private void comeBackToMainActivityWithAverage(View actualView, double average) {
         Intent intent = new Intent(GradesActivity.this, MainActivity.class);
         intent.putExtra(AVERAGE_KEY, average);
-        actualView.getContext().startActivity(intent);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override

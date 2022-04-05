@@ -1,5 +1,8 @@
 package com.example.lab1;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,16 +18,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int MIN_NUMBER_OF_GRADES = 5;
-    private static final int MAX_NUMBER_OF_GRADES = 15;
-    private static final double POSITIVE_AVERAGE_THRESHOLD = 3.0;
-
     public static final String EDIT_TEXT_NAME_KEY = "editTextName";
     public static final String EDIT_TEXT_SURNAME_KEY = "editTextSurname";
     public static final String EDIT_TEXT_NUMBER_OF_GRADES_KEY = "editTextNumberOfGrades";
     public static final String IS_BUTTON_VISIBLE_KEY = "isButtonVisible";
+
+    private static final int MIN_NUMBER_OF_GRADES = 5;
+    private static final int MAX_NUMBER_OF_GRADES = 15;
+    private static final double POSITIVE_AVERAGE_THRESHOLD = 3.0;
 
     EditText editTextName;
     EditText editTextSurname;
@@ -32,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     Button buttonGoFurther;
     TextView textViewYourAverage;
     Button buttonConfirmAverage;
+
+    private ActivityResultLauncher<Intent> mActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
         hideButtonAtTheBeginning();
 
         addListenersToElements();
-
-        processCountedAverage();
+        setUpForProcessingCalculatedAverage();
     }
 
     private void connectLayoutElementsWithFields() {
@@ -110,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 // empty method
             }
         });
+
         editTextNumberOfGrades.setOnFocusChangeListener((view, hasFocus) -> {
             if (!hasFocus && !isNumberOfGradesIsInProperInterval()) {
                 String errorText = getResources().getString(R.string.wrongNumberOfGradesAnnouncement);
@@ -123,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         buttonGoFurther.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, GradesActivity.class);
             intent.putExtra(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
-            startActivity(intent);
+            mActivityResultLauncher.launch(intent);
         });
     }
 
@@ -139,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         boolean nameIsNotEmpty = isTextFieldNotEmpty(editTextName);
         boolean surnameIsNotEmpty = isTextFieldNotEmpty(editTextSurname);
         boolean numberOfGradesIsInProperInterval = isNumberOfGradesIsInProperInterval();
+
         return nameIsNotEmpty && surnameIsNotEmpty && numberOfGradesIsInProperInterval;
     }
 
@@ -156,10 +163,17 @@ public class MainActivity extends AppCompatActivity {
         return numberOfGrades >= MIN_NUMBER_OF_GRADES && numberOfGrades <= MAX_NUMBER_OF_GRADES;
     }
 
-    private void processCountedAverage() {
-        Bundle bundleFromGradesActivity = getIntent().getExtras();
-        if (bundleFromGradesActivity != null) {
-            double average = bundleFromGradesActivity.getDouble(GradesActivity.AVERAGE_KEY);
+    private void setUpForProcessingCalculatedAverage() {
+        mActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::processCalculatedAverage);
+    }
+
+    private void processCalculatedAverage(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK) {
+            Intent resultData = result.getData();
+            double average = Objects.requireNonNull(resultData)
+                    .getDoubleExtra(GradesActivity.AVERAGE_KEY, 0.0);
             boolean isGradePositive = average >= POSITIVE_AVERAGE_THRESHOLD;
 
             displayAverageViewElements();
