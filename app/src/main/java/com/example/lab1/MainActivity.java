@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String EDIT_TEXT_SURNAME_KEY = "editTextSurname";
     public static final String EDIT_TEXT_NUMBER_OF_GRADES_KEY = "editTextNumberOfGrades";
     public static final String IS_BUTTON_VISIBLE_KEY = "isButtonVisible";
+    public static final String ARE_AVERAGE_ELEMENTS_VISIBLE_KEY = "areAverageElementsVisible";
+    public static final String CALCULATED_AVERAGE_KEY = "calculatedAverageKey";
 
     private static final int MIN_NUMBER_OF_GRADES = 5;
     private static final int MAX_NUMBER_OF_GRADES = 15;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     Button buttonConfirmAverage;
 
     private ActivityResultLauncher<Intent> mActivityResultLauncher;
+    private double calculatedAverage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,12 +175,12 @@ public class MainActivity extends AppCompatActivity {
     private void processCalculatedAverage(ActivityResult result) {
         if (result.getResultCode() == RESULT_OK) {
             Intent resultData = result.getData();
-            double average = Objects.requireNonNull(resultData)
+            calculatedAverage = Objects.requireNonNull(resultData)
                     .getDoubleExtra(GradesActivity.AVERAGE_KEY, 0.0);
-            boolean isGradePositive = average >= POSITIVE_AVERAGE_THRESHOLD;
+            boolean isGradePositive = calculatedAverage >= POSITIVE_AVERAGE_THRESHOLD;
 
             displayAverageViewElements();
-            setAverageInTextView(average);
+            setAverageInTextView(calculatedAverage);
             setProperTextInFinalButton(isGradePositive);
             displayFinalMessageAndCloseApplication(isGradePositive);
         }
@@ -219,6 +222,12 @@ public class MainActivity extends AppCompatActivity {
         outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
         outState.putBoolean(IS_BUTTON_VISIBLE_KEY, isButtonVisible);
 
+        boolean areAverageElementsVisible = findViewById(R.id.buttonConfirmAverage).getVisibility() == View.VISIBLE;
+        outState.putBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY, areAverageElementsVisible);
+        if (areAverageElementsVisible) {
+            outState.putDouble(CALCULATED_AVERAGE_KEY, calculatedAverage);
+        }
+
         super.onSaveInstanceState(outState);
     }
 
@@ -230,5 +239,16 @@ public class MainActivity extends AppCompatActivity {
         editTextNumberOfGrades.setText(savedInstanceState.getString(EDIT_TEXT_NUMBER_OF_GRADES_KEY));
         buttonGoFurther.setVisibility(
                 savedInstanceState.getBoolean(IS_BUTTON_VISIBLE_KEY) ? View.VISIBLE : View.INVISIBLE);
+
+        boolean areAverageElementsVisible = savedInstanceState.getBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY);
+        if (areAverageElementsVisible) {
+            calculatedAverage = savedInstanceState.getDouble(CALCULATED_AVERAGE_KEY);
+            boolean isGradePositive = calculatedAverage >= POSITIVE_AVERAGE_THRESHOLD;
+
+            displayAverageViewElements();
+            setAverageInTextView(calculatedAverage);
+            setProperTextInFinalButton(isGradePositive);
+            displayFinalMessageAndCloseApplication(isGradePositive);
+        }
     }
 }
