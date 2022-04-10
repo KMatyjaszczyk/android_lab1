@@ -32,15 +32,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int MAX_NUMBER_OF_GRADES = 15;
     private static final double POSITIVE_AVERAGE_THRESHOLD = 3.0;
 
-    EditText editTextName;
-    EditText editTextSurname;
-    EditText editTextNumberOfGrades;
-    Button buttonGoFurther;
-    TextView textViewYourAverage;
-    Button buttonConfirmAverage;
+    private EditText mEditTextName;
+    private EditText mEditTextSurname;
+    private EditText mEditTextNumberOfGrades;
+    private Button mButtonGoFurther;
+    private TextView mTextViewYourAverage;
+    private Button mButtonConfirmAverage;
 
     private ActivityResultLauncher<Intent> mActivityResultLauncher;
-    private double calculatedAverage;
+    private boolean mAreAverageElementsVisible;
+    private double mCalculatedAverage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,25 +52,26 @@ public class MainActivity extends AppCompatActivity {
         hideButtonAtTheBeginning();
 
         addListenersToElements();
+
         setUpForProcessingCalculatedAverage();
     }
 
     private void connectLayoutElementsWithFields() {
-        editTextName = findViewById(R.id.editTextName);
-        editTextSurname = findViewById(R.id.editTextSurname);
-        editTextNumberOfGrades = findViewById(R.id.editTextNumberOfGrades);
-        buttonGoFurther = findViewById(R.id.buttonGoFurther);
-        textViewYourAverage = findViewById(R.id.textViewYourAverage);
-        buttonConfirmAverage = findViewById(R.id.buttonConfirmAverage);
+        mEditTextName = findViewById(R.id.editTextName);
+        mEditTextSurname = findViewById(R.id.editTextSurname);
+        mEditTextNumberOfGrades = findViewById(R.id.editTextNumberOfGrades);
+        mButtonGoFurther = findViewById(R.id.buttonGoFurther);
+        mTextViewYourAverage = findViewById(R.id.textViewYourAverage);
+        mButtonConfirmAverage = findViewById(R.id.buttonConfirmAverage);
     }
 
     private void hideButtonAtTheBeginning() {
-        buttonGoFurther.setVisibility(View.INVISIBLE);
+        mButtonGoFurther.setVisibility(View.INVISIBLE);
     }
 
     private void addListenersToElements() {
-        addNotNullListenersToTextField(editTextName);
-        addNotNullListenersToTextField(editTextSurname);
+        addNotNullListenersToTextField(mEditTextName);
+        addNotNullListenersToTextField(mEditTextSurname);
         addProperNumberOfGradesListeners();
         addGoToNextActivityListener();
     }
@@ -102,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addProperNumberOfGradesListeners() {
-        editTextNumberOfGrades.addTextChangedListener(new TextWatcher() {
+        mEditTextNumberOfGrades.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 // empty method
@@ -119,34 +121,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        editTextNumberOfGrades.setOnFocusChangeListener((view, hasFocus) -> {
+        mEditTextNumberOfGrades.setOnFocusChangeListener((view, hasFocus) -> {
             if (!hasFocus && !isNumberOfGradesIsInProperInterval()) {
                 String errorText = getResources().getString(R.string.wrongNumberOfGradesAnnouncement);
-                editTextNumberOfGrades.setError(errorText);
+                mEditTextNumberOfGrades.setError(errorText);
                 Toast.makeText(MainActivity.this, errorText, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void addGoToNextActivityListener() {
-        buttonGoFurther.setOnClickListener(view -> {
+        mButtonGoFurther.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, GradesActivity.class);
-            intent.putExtra(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
+            intent.putExtra(EDIT_TEXT_NUMBER_OF_GRADES_KEY, mEditTextNumberOfGrades.getText().toString());
             mActivityResultLauncher.launch(intent);
         });
     }
 
     private void switchButtonVisibilityIfNecessary() {
         if (canButtonBeVisible()) {
-            buttonGoFurther.setVisibility(View.VISIBLE);
+            mButtonGoFurther.setVisibility(View.VISIBLE);
         } else {
-            buttonGoFurther.setVisibility(View.INVISIBLE);
+            mButtonGoFurther.setVisibility(View.INVISIBLE);
         }
     }
 
     private boolean canButtonBeVisible() {
-        boolean nameIsNotEmpty = isTextFieldNotEmpty(editTextName);
-        boolean surnameIsNotEmpty = isTextFieldNotEmpty(editTextSurname);
+        boolean nameIsNotEmpty = isTextFieldNotEmpty(mEditTextName);
+        boolean surnameIsNotEmpty = isTextFieldNotEmpty(mEditTextSurname);
         boolean numberOfGradesIsInProperInterval = isNumberOfGradesIsInProperInterval();
 
         return nameIsNotEmpty && surnameIsNotEmpty && numberOfGradesIsInProperInterval;
@@ -159,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isNumberOfGradesIsInProperInterval() {
         int numberOfGrades;
         try {
-            numberOfGrades = Integer.parseInt(editTextNumberOfGrades.getText().toString());
+            numberOfGrades = Integer.parseInt(mEditTextNumberOfGrades.getText().toString());
         } catch (NumberFormatException e) {
             return false;
         }
@@ -175,35 +177,43 @@ public class MainActivity extends AppCompatActivity {
     private void processCalculatedAverage(ActivityResult result) {
         if (result.getResultCode() == RESULT_OK) {
             Intent resultData = result.getData();
-            calculatedAverage = Objects.requireNonNull(resultData)
+            mAreAverageElementsVisible = true;
+            mCalculatedAverage = Objects.requireNonNull(resultData)
                     .getDoubleExtra(GradesActivity.AVERAGE_KEY, 0.0);
-            boolean isGradePositive = calculatedAverage >= POSITIVE_AVERAGE_THRESHOLD;
+
+            displayAverageElementsIfNecessary();
+        }
+    }
+
+    private void displayAverageElementsIfNecessary() {
+        if (mAreAverageElementsVisible) {
+            boolean isGradePositive = mCalculatedAverage >= POSITIVE_AVERAGE_THRESHOLD;
 
             displayAverageViewElements();
-            setAverageInTextView(calculatedAverage);
+            setAverageInTextView(mCalculatedAverage);
             setProperTextInFinalButton(isGradePositive);
             displayFinalMessageAndCloseApplication(isGradePositive);
         }
     }
 
     private void displayAverageViewElements() {
-        textViewYourAverage.setVisibility(View.VISIBLE);
-        buttonConfirmAverage.setVisibility(View.VISIBLE);
+        mTextViewYourAverage.setVisibility(View.VISIBLE);
+        mButtonConfirmAverage.setVisibility(View.VISIBLE);
     }
 
     private void setAverageInTextView(double average) {
         String averageMessage = String.format(Locale.getDefault(), "%s: %.2f",
                 getResources().getString(R.string.textViewYourAverage), average);
-        textViewYourAverage.setText(averageMessage);
+        mTextViewYourAverage.setText(averageMessage);
     }
 
     private void setProperTextInFinalButton(boolean isGradePositive) {
-        buttonConfirmAverage.setText(isGradePositive ?
+        mButtonConfirmAverage.setText(isGradePositive ?
                 R.string.buttonConfirmAveragePositive : R.string.buttonConfirmAverageNegative);
     }
 
     private void displayFinalMessageAndCloseApplication(boolean isGradePositive) {
-        buttonConfirmAverage.setOnClickListener(view -> {
+        mButtonConfirmAverage.setOnClickListener(view -> {
             Toast.makeText(
                     MainActivity.this,
                     isGradePositive ? R.string.textOnExitApplicationPositive : R.string.textOnExitApplicationNegative,
@@ -217,16 +227,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         boolean isButtonVisible = findViewById(R.id.buttonGoFurther).getVisibility() == View.VISIBLE;
 
-        outState.putString(EDIT_TEXT_NAME_KEY, editTextName.getText().toString());
-        outState.putString(EDIT_TEXT_SURNAME_KEY, editTextSurname.getText().toString());
-        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, editTextNumberOfGrades.getText().toString());
+        outState.putString(EDIT_TEXT_NAME_KEY, mEditTextName.getText().toString());
+        outState.putString(EDIT_TEXT_SURNAME_KEY, mEditTextSurname.getText().toString());
+        outState.putString(EDIT_TEXT_NUMBER_OF_GRADES_KEY, mEditTextNumberOfGrades.getText().toString());
         outState.putBoolean(IS_BUTTON_VISIBLE_KEY, isButtonVisible);
 
-        boolean areAverageElementsVisible = findViewById(R.id.buttonConfirmAverage).getVisibility() == View.VISIBLE;
-        outState.putBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY, areAverageElementsVisible);
-        if (areAverageElementsVisible) {
-            outState.putDouble(CALCULATED_AVERAGE_KEY, calculatedAverage);
-        }
+        outState.putBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY, mAreAverageElementsVisible);
+        outState.putDouble(CALCULATED_AVERAGE_KEY, mCalculatedAverage);
 
         super.onSaveInstanceState(outState);
     }
@@ -234,21 +241,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        editTextName.setText(savedInstanceState.getString(EDIT_TEXT_NAME_KEY));
-        editTextSurname.setText(savedInstanceState.getString(EDIT_TEXT_SURNAME_KEY));
-        editTextNumberOfGrades.setText(savedInstanceState.getString(EDIT_TEXT_NUMBER_OF_GRADES_KEY));
-        buttonGoFurther.setVisibility(
+
+        mEditTextName.setText(savedInstanceState.getString(EDIT_TEXT_NAME_KEY));
+        mEditTextSurname.setText(savedInstanceState.getString(EDIT_TEXT_SURNAME_KEY));
+        mEditTextNumberOfGrades.setText(savedInstanceState.getString(EDIT_TEXT_NUMBER_OF_GRADES_KEY));
+        mButtonGoFurther.setVisibility(
                 savedInstanceState.getBoolean(IS_BUTTON_VISIBLE_KEY) ? View.VISIBLE : View.INVISIBLE);
 
-        boolean areAverageElementsVisible = savedInstanceState.getBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY);
-        if (areAverageElementsVisible) {
-            calculatedAverage = savedInstanceState.getDouble(CALCULATED_AVERAGE_KEY);
-            boolean isGradePositive = calculatedAverage >= POSITIVE_AVERAGE_THRESHOLD;
-
-            displayAverageViewElements();
-            setAverageInTextView(calculatedAverage);
-            setProperTextInFinalButton(isGradePositive);
-            displayFinalMessageAndCloseApplication(isGradePositive);
-        }
+        mAreAverageElementsVisible = savedInstanceState.getBoolean(ARE_AVERAGE_ELEMENTS_VISIBLE_KEY);
+        mCalculatedAverage = savedInstanceState.getDouble(CALCULATED_AVERAGE_KEY);
+        displayAverageElementsIfNecessary();
     }
 }
